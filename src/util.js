@@ -137,9 +137,13 @@
       const label = m[1].toUpperCase();
       const count = Number(m[2]);
       if (!count) continue;
+      // "D/ST" is one position whose name contains a slash, not a two-position flex.
+      // Collapse it before the split that turns "WR/TE" into a shared slot, or it
+      // parses as "D" plus "ST" and accepts nothing at all.
+      const canonical = label.replace(/\bD\/ST\b/g, 'DST');
       const accepts = label === 'BN' || label === 'BENCH'
         ? BENCH_ACCEPTS.slice()
-        : label.split('/').map(normalizePos);
+        : canonical.split('/').map(normalizePos);
       out.push({ key: label.replace(/\//g, ''), label, count, accepts });
     }
     return out.length ? out : null;
