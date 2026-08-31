@@ -332,6 +332,9 @@
     refs.body.append(refs.settings);
 
     wireEvents(hdr);
+    // Populate settings inputs now. They used to fill in only when the gear was
+    // clicked, so the baselines box read empty while baselines were actually set.
+    syncSettingsInputs();
   }
 
   function wireEvents(hdr) {

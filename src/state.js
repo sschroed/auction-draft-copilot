@@ -23,10 +23,18 @@
     ],
     // Replacement baselines for the value model, per pool. Null derives them from
     // starter demand; these came from fitting against real clearing prices, which is
-    // what tools/calibrate.js and the panel's Calibrate button reproduce. Tuned to
-    // FPL — a different roster shape needs its own fit.
+    // what tools/calibrate.js and the panel's Calibrate button reproduce.
     baselines: { QB: 24, RB: 18, WRTE: 36 },
+    // The league these baselines were fitted for. A fit does not transfer across
+    // roster shapes — applying FPL's numbers to a 6-team 1QB league flattens the whole
+    // curve (Allen $55 -> $30) — so changing teams or slots discards them and falls
+    // back to deriving from starter demand.
+    baselinesFor: 'QB=2,RB=2,WR/TE=4,BN=4@10',
   };
+
+  // Identity of the league a fit belongs to: roster shape plus team count.
+  const leagueSignature = (settings) =>
+    settings.slots.map((s) => `${s.label}=${s.count}`).join(',') + '@' + settings.teams;
 
   const defaultState = () => ({
     settings: structuredClone(DEFAULT_SETTINGS),
@@ -92,7 +100,14 @@
     },
 
     setSettings(patch) {
-      state.settings = { ...state.settings, ...patch };
+      const next = { ...state.settings, ...patch };
+      // Tuned baselines belong to the league they were fitted for. Silently carrying
+      // them into a different roster shape is worse than having none.
+      if (next.baselines && next.baselinesFor !== leagueSignature(next)) {
+        next.baselines = null;
+        next.baselinesFor = null;
+      }
+      state.settings = next;
       emit();
     },
 
@@ -106,7 +121,11 @@
     },
 
     setBaselines(baselines) {
-      state.settings = { ...state.settings, baselines: baselines || null };
+      state.settings = {
+        ...state.settings,
+        baselines: baselines || null,
+        baselinesFor: baselines ? leagueSignature(state.settings) : null,
+      };
       emit();
     },
 
