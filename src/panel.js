@@ -721,6 +721,11 @@
   function render(st) {
     const sum = NS.engine.summarize(st);
 
+    // Sales land continuously during a draft, so the archive line has to follow the
+    // state like everything else. It used to refresh only when the gear was toggled,
+    // which meant the count sat stale for a whole auction.
+    renderArchiveMsg();
+
     panel.style.left = st.panel.x != null ? st.panel.x + 'px' : '';
     panel.style.top = st.panel.y != null ? st.panel.y + 'px' : '';
     if (st.panel.x != null) panel.style.right = 'auto';
