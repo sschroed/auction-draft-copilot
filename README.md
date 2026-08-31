@@ -13,7 +13,12 @@ the block.
 recommendation, per-position budget allocation, the pinned player with a BID TO ceiling, and
 roster and inflation chips." width="330">
 
-## Load it
+Ordered by when you do it: set up and calibrate in the days before, then the draft-day
+checklist, then what the panel is telling you while the auction runs.
+
+## Before draft day
+
+### 1. Install it
 
 1. Chrome → `chrome://extensions` → enable **Developer mode** (top right)
 2. **Load unpacked** → pick this folder
@@ -24,10 +29,7 @@ card, **then refresh the draft tab**. Reloading the extension does not replace t
 already running in a page that is open — miss the refresh and you are still on the old
 version with no indication that anything is stale.
 
-The panel drags by its header if it is in your way. On a short window the settings panel can
-run past the bottom of the screen; collapsing the **calibration** section brings it back.
-
-## Set it up for your league
+### 2. Describe your league
 
 Open **⚙ settings** in the panel:
 
@@ -54,7 +56,7 @@ fitted for, so changing the slots or the team count discards it and goes back to
 from starter demand. Changing the budget does not. If you have spent three mock drafts
 earning a fit, do not casually edit `BN=4` to `BN=5` afterwards.
 
-## Getting player numbers in
+### 3. Load player numbers
 
 The box takes either format and tells you which it used:
 
@@ -74,7 +76,10 @@ pre-filled with your league id; paste it into DevTools on a fantasy.espn.com pag
 copy out the CSV. That request runs in your browser, in your session, by hand — the
 extension itself never makes one.
 
-## Calibrate it to your league
+### 4. Calibrate to your league
+
+Optional — the panel works without it, deriving baselines from starter demand. But this is
+where the edge is, and it is the one step nobody else at your table has done.
 
 The one number that cannot be read off your league's rules is **replacement baseline** —
 how many players at each position are worth real money. It has to be fitted against what
@@ -116,6 +121,21 @@ node tools/calibrate.js projections.csv sales.csv --teams 10 --slots 'QB=2, RB=2
 prices. It deliberately does not correct for auction timing — early nominations clear
 far above list and late ones crater — so absolute error is only comparable within one
 dataset. The ranking is the useful part.
+
+## On draft day
+
+Ten minutes before the auction:
+
+1. If you changed anything since last time, reload the extension **and refresh the draft
+   tab**. Skipping the refresh leaves the old code running with no sign that it has.
+2. Open the draft room and check the panel title reads **· live**. That is detection
+   confirming it can see the room.
+3. Open ⚙ and confirm it says `N players loaded`, and that budget, teams and slots match
+   the league you are actually in.
+4. Check the baselines box. If it holds your fitted numbers, good. If it is empty the model
+   is deriving from starter demand instead — workable, but know which one you are using.
+5. Keep exactly one draft tab open. Two triggers ESPN's Duplicate Connection and one of
+   them goes stale.
 
 ## Reading the panel
 
@@ -160,7 +180,7 @@ value`, `FINE AT VALUE`, `NO RUSH`, or `DONE` when the slot is full.
 | `⚠ <POS> run` | 3 or more of the last 5 sales were that position — prices there are spiking. |
 | `⚠ ESPN max $N` | ESPN's own figure disagrees with the tracked budget. Trust ESPN and repair your log with the `↩` buttons. |
 
-## Use it during the draft
+## During the draft
 
 - Nomination detection pins the player automatically; the **search box** (2–3 letters) is
   the fallback.
@@ -198,7 +218,6 @@ and walk your roster back with the `↩` buttons until the chip clears.
 **You cannot see the panel.** It drags by its header, and its position is remembered between
 sessions. If the settings panel runs off the bottom of a short window, collapse the
 **calibration** section.
-
 
 `DRAFT-NOTES.md` has the strategy findings from building this — why quarterbacks are
 mispriced in 2QB leagues, why early prices run ~1.7× value, and the endgame read that
