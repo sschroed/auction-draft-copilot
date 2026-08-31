@@ -181,6 +181,19 @@
     return s ? `${s.count}/${s.count}` : '';
   };
 
+  // Keep the panel inside the viewport. The position is persisted, and window sizes
+  // change between sessions — a panel dragged to the right edge of a wide monitor
+  // lands off-screen on a smaller one, where it is invisible AND unrecoverable,
+  // because dragging it back means grabbing a header you cannot see.
+  function clampPanelPos(x, y) {
+    const w = panel.offsetWidth || 320;
+    const h = panel.offsetHeight || 200;
+    return {
+      x: Math.max(0, Math.min(Math.max(0, window.innerWidth - w), x)),
+      y: Math.max(0, Math.min(Math.max(0, window.innerHeight - h), y)),
+    };
+  }
+
   // Slot spec parsing lives in util.js so the Node tools describe a league the same way.
   const { slotsToSpec, specToSlots, configFromSlots } = NS.util;
 
@@ -350,8 +363,7 @@
     });
     window.addEventListener('mousemove', (e) => {
       if (!drag) return;
-      const x = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - drag.dx));
-      const y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - drag.dy));
+      const { x, y } = clampPanelPos(e.clientX - drag.dx, e.clientY - drag.dy);
       panel.style.left = x + 'px'; panel.style.top = y + 'px'; panel.style.right = 'auto';
       drag.pos = { x, y };
     });
@@ -593,6 +605,9 @@
       });
     }
 
+    // A resize can strand a previously-valid position off-screen; re-clamp on the spot.
+    window.addEventListener('resize', () => render(S.get()));
+
     // Keep keystrokes inside the panel from reaching ESPN's page handlers.
     for (const evt of ['keydown', 'keyup', 'keypress']) {
       panel.addEventListener(evt, (e) => e.stopPropagation());
@@ -726,9 +741,15 @@
     // which meant the count sat stale for a whole auction.
     renderArchiveMsg();
 
-    panel.style.left = st.panel.x != null ? st.panel.x + 'px' : '';
-    panel.style.top = st.panel.y != null ? st.panel.y + 'px' : '';
-    if (st.panel.x != null) panel.style.right = 'auto';
+    if (st.panel.x != null) {
+      const { x, y } = clampPanelPos(st.panel.x, st.panel.y || 0);
+      panel.style.left = x + 'px';
+      panel.style.top = y + 'px';
+      panel.style.right = 'auto';
+    } else {
+      panel.style.left = '';
+      panel.style.top = '';
+    }
     refs.body.classList.toggle('hidden', !!st.panel.collapsed);
     refs.collapseBtn.textContent = st.panel.collapsed ? '▢' : '—';
 
