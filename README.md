@@ -9,6 +9,10 @@ the block.
 > ESPN is their trademark, used here only to say what the extension reads. This is a
 > personal, non-commercial project.
 
+<img src="docs/panel-live.png" alt="The Co-Pilot panel during a draft: budget summary, a DO NOW
+recommendation, per-position budget allocation, the pinned player with a BID TO ceiling, and
+roster and inflation chips." width="330">
+
 ## Load it
 
 1. Chrome → `chrome://extensions` → enable **Developer mode** (top right)
@@ -28,6 +32,10 @@ Open **⚙ settings** in the panel:
   exactly what a receiver scoring the same is worth. `BN` (or `BENCH`) is depth — it
   costs money but creates no starter demand.
 - **Values box** — paste your player numbers and hit **Import**.
+
+<img src="docs/panel-settings.png" alt="The settings panel: budget and teams, the roster slot
+spec, the paste box accepting values or projections, and the calibration section showing ranked
+replacement baselines with apply buttons." width="330">
 
 Roster shape drives everything. Replacement level is computed from the slots you enter,
 so a 2QB league and a 1QB league produce genuinely different prices from the same
@@ -93,6 +101,13 @@ dataset. The ranking is the useful part.
 - Panel flashes **amber** within $3 of your max, **red** past it.
 - Everything persists across refresh. **Reset draft** clears sales and roster but keeps
   your values, settings, and calibration archive.
+
+Late in a draft, once your opponents are broke, BID TO stops being about the player's value
+and starts being about what the room can physically reach — no player can cost more than the
+richest opponent's remaining budget plus $1:
+
+<img src="docs/panel-endgame.png" alt="The panel in the endgame: BID TO $9 with the note ROOM
+CAN ONLY REACH $8, because no opponent has more than $8 left." width="330">
 
 `DRAFT-NOTES.md` has the strategy findings from building this — why quarterbacks are
 mispriced in 2QB leagues, why early prices run ~1.7× value, and the endgame read that
