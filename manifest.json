@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Auction Draft Co-Pilot",
+  "version": "0.1.0",
+  "description": "Read-only overlay assistant for ESPN salary cap (auction) fantasy football drafts.",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://fantasy.espn.com/*",
+        "https://*.fantasy.espn.com/*"
+      ],
+      "js": [
+        "src/util.js",
+        "tools/value-model.js",
+        "src/calibrate.js",
+        "src/snippet.js",
+        "src/state.js",
+        "src/engine.js",
+        "src/detect.js",
+        "src/panel.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

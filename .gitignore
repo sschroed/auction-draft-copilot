@@ -1,0 +1,13 @@
+# ESPN-derived data. Projections are ESPN's content and the values are computed from
+# them — both are generated locally and never committed. See the README for how to
+# produce your own.
+reference/espn-projections-2026.csv
+reference/values-*.csv
+reference/sales-*.csv
+
+# Obsidian local editor state
+.obsidian/
+
+# OS / editor noise
+.DS_Store
+node_modules/
