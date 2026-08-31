@@ -52,6 +52,11 @@
     // have different league ids; without this, a mock's results follow you into
     // the real draft and quietly corrupt the budget.
     leagueKey: null,
+    // Roster shape in force when this draft's first sale landed. Pinned there rather
+    // than read at archive time: you finish a draft, reconfigure for the next one, and
+    // only THEN enter the new room — reading it late stamps the finished draft with
+    // the shape of the draft you are about to play.
+    soldSignature: null,
     // Finished drafts kept for calibration. Every mock is a sample of what a room
     // pays, and those samples are the only way to fit replacement baselines — so
     // entering a new room banks the old one here instead of discarding it.
@@ -94,6 +99,12 @@
       if (saved && typeof saved === 'object') {
         state = { ...defaultState(), ...saved };
         state.settings = { ...structuredClone(DEFAULT_SETTINGS), ...(saved.settings || {}) };
+        // Drafts archived before shapes were recorded get stamped with the league
+        // configured now. Not certain, but it is where they most likely came from,
+        // and leaving them unlabelled would silently pool them into every fit.
+        for (const d of state.archive) {
+          if (!d.signature) d.signature = leagueSignature(state.settings);
+        }
       }
       for (const fn of listeners) fn(state);
       return state;
@@ -140,6 +151,7 @@
         norm: player.norm, name: player.name, pos: player.pos,
         price: Number.isFinite(price) ? price : null, mine, ts: Date.now(),
       };
+      if (!state.soldSignature) state.soldSignature = leagueSignature(state.settings);
       state.sold.push(row);
       if (mine && Number.isFinite(price)) {
         state.myRoster.push({ norm: player.norm, name: player.name, pos: player.pos, price });
@@ -181,6 +193,7 @@
     resetDraft() {
       state.sold = [];
       state.myRoster = [];
+      state.soldSignature = null;
       emit();
     },
 
@@ -192,15 +205,36 @@
         .filter((s) => Number.isFinite(s.price) && s.price > 0)
         .map((s) => ({ name: s.name, pos: s.pos, price: s.price }));
       if (!sales.length) return false;
-      state.archive.push({ leagueKey: state.leagueKey, endedAt: Date.now(), sales });
+      state.archive.push({
+        leagueKey: state.leagueKey,
+        // Prices only mean something against the roster that produced them. A 1QB
+        // standard mock says nothing about what a quarterback costs in a 2QB league.
+        signature: state.soldSignature || leagueSignature(state.settings),
+        endedAt: Date.now(),
+        sales,
+      });
       if (state.archive.length > MAX_ARCHIVED_DRAFTS) {
         state.archive = state.archive.slice(-MAX_ARCHIVED_DRAFTS);
       }
       return true;
     },
 
+    // Only drafts played under the current roster shape. Mixing shapes is the same
+    // error as carrying baselines across leagues, one layer down.
     archivedSales() {
-      return state.archive.flatMap((d) => d.sales);
+      const sig = leagueSignature(state.settings);
+      return state.archive.filter((d) => d.signature === sig).flatMap((d) => d.sales);
+    },
+
+    // {matching, total} draft counts, for telling the user what the fit will use.
+    archiveCounts() {
+      const sig = leagueSignature(state.settings);
+      const matching = state.archive.filter((d) => d.signature === sig);
+      return {
+        matchingDrafts: matching.length,
+        totalDrafts: state.archive.length,
+        matchingSales: matching.reduce((n, d) => n + d.sales.length, 0),
+      };
     },
 
     clearArchive() {
@@ -220,6 +254,7 @@
       state.leagueKey = key;
       state.sold = [];
       state.myRoster = [];
+      state.soldSignature = null;
       emit();
       return hadData;
     },

@@ -616,12 +616,13 @@
   function renderArchiveMsg() {
     if (!refs.archiveMsg) return;
     const st = NS.state.get();
-    const drafts = st.archive.length;
-    const banked = st.archive.reduce((n, d) => n + d.sales.length, 0);
+    const { matchingDrafts, totalDrafts, matchingSales } = NS.state.archiveCounts();
     const live = st.sold.filter((x) => Number.isFinite(x.price) && x.price > 0).length;
+    const others = totalDrafts - matchingDrafts;
     refs.archiveMsg.textContent =
-      `${drafts} draft${drafts === 1 ? '' : 's'} archived · ${banked + live} priced sales` +
-      (live ? ` (${live} from this room)` : '');
+      `${matchingDrafts} draft${matchingDrafts === 1 ? '' : 's'} · ${matchingSales + live} priced sales` +
+      (live ? ` (${live} live)` : '') +
+      (others ? ` · ${others} archived under another roster shape, not used` : '');
   }
 
   // Top few candidates with an Apply button each. Bias is shown because it says WHERE
